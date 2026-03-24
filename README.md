@@ -3,7 +3,7 @@
 
 ##### Инфра
 1. BaseScript
-    - update + upgrade + [sudo vim]
+    - update + upgrade + [sudo vim curl]
     - add new sudoer + deactevate root
     - docker + docker-compoes + adduser
 2. Blaze - gateway
@@ -12,6 +12,7 @@
 3. Surtr - основной сервер WG
 - [ ] WG инстанс
 4. Skadi - вспомогательный сервер для утилит
+- [ ] Ansible - для раскатки на других хостах.
 - [ ] proxy?
 - [ ] Мониторинг?
 
