@@ -1,0 +1,8 @@
+{
+	admin off
+	email just.me.juncy@gmail.com
+}
+
+{$WG_HOST} {
+	reverse_proxy wg:51821
+}

@@ -1,0 +1,65 @@
+services:
+  wg:
+    image: ghcr.io/wg-easy/wg-easy:15.5
+    container_name: wg
+    restart: unless-stopped
+    stop_grace_period: 10s
+    cap_add: [NET_ADMIN]
+    sysctls:
+      net.ipv4.ip_forward: "1"
+      net.ipv4.conf.all.src_valid_mark: "1"
+    environment:
+      WG_HOST: ${WG_HOST}
+      PORT: "51821"
+      PASSWORD_HASH: ${WG_HASH}
+      WG_DEFAULT_DNS: 77.88.8.8
+      WG_PERSISTENT_KEEPALIVE: "25"
+    ports:
+      - "51820:51820/udp"
+    volumes: ["./etc/wireguard:/etc/wireguard"]
+    networks: [edge]
+    mem_limit: 512m
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:51821"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+
+
+  caddy:
+    image: caddy:2.9-alpine
+    container_name: caddy
+    restart: unless-stopped
+    cap_drop: [ALL]
+    cap_add: [NET_BIND_SERVICE]
+    environment:
+      WG_HOST: ${WG_HOST}
+    ports:
+      - "80:80/tcp"
+      - "443:443/tcp"
+    volumes:
+      - "./Caddyfile:/etc/caddy/Caddyfile:ro"
+      - "caddy_data:/data"
+    networks: [edge]
+    mem_limit: 256m
+    depends_on:
+      wg:
+        condition: service_healthy
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
+    healthcheck:
+      test: ["CMD", "caddy", "validate", "--config", "/etc/caddy/Caddyfile"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+networks:
+  edge:
+    driver: bridge
+
+volumes:
+  caddy_data: {}
