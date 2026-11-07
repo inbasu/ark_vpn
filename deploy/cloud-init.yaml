@@ -1,0 +1,27 @@
+#cloud-config
+
+package_update: true
+ssh_pwauth: false
+packages: [curl, git, ufw]
+users:
+  - default
+  - name: deploy
+    shell: /bin/bash
+    lock_passwd: true
+    sudo:
+      - "ALL=(ALL) NOPASSWD: /usr/bin/docker"
+      - "ALL=(ALL) NOPASSWD: /usr/bin/git"
+
+
+runcmd:
+  # Environments
+  - export HOSTNAME=""
+  - export ARKNIGHT=""
+  
+  # Docker
+  - curl -fsSL https://get.docker.com -o /tmp/get-docker.sh
+  - sh /tmp/get-docker.sh
+  - usermod -aG docker deploy
+  
+  # Deploy stack
+  - curl -fsSL https://raw.githubusercontent.com/inbasu/ark_vpn/main/deploy/deploy.sh | bash 
